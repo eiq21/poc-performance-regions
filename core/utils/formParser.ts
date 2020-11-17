@@ -1,5 +1,18 @@
 import Busboy from "busboy";
 
+export interface UploadedFile {
+  filename: string;
+  contentType: string;
+  encoding: string;
+  fieldname: string;
+  content: Buffer | string;
+}
+
+export interface FormData {
+  file?: UploadedFile;
+  fields: Record<string, any>;
+}
+
 class FormParser {
   private getContentType = (event: any) => {
     let contentType = event.headers["content-type"];
@@ -10,9 +23,12 @@ class FormParser {
     return contentType;
   };
 
-  public parser = (event: any, fileZise: number): Promise<any> => {
+  public parser = (event: any, fileZise: number): Promise<FormData> => {
     return new Promise((resolve, reject) => {
       try {
+        const fields: Record<string, any> = {};
+        let uploadedFile: UploadedFile;
+
         const busboy = new Busboy({
           headers: {
             "content-type": this.getContentType(event),
@@ -21,9 +37,6 @@ class FormParser {
             fileSize: fileZise,
           },
         });
-        let result: any = {
-          files: [],
-        };
 
         busboy.on(
           "file",
@@ -34,28 +47,27 @@ class FormParser {
             encoding: any,
             mimetype: any
           ) => {
-            let uploadFile: any = {};
             file.on("data", (data: any) => {
-              uploadFile.content = data;
+              uploadedFile.content = data;
             });
             file.on("end", () => {
-              if (uploadFile.content) {
-                uploadFile.filename = filename;
-                uploadFile.contentType = mimetype;
-                uploadFile.encoding = encoding;
-                uploadFile.fieldname = fieldname;
-                result.files.push(uploadFile);
+              if (uploadedFile.content) {
+                uploadedFile.filename = filename;
+                uploadedFile.contentType = mimetype;
+                uploadedFile.encoding = encoding;
+                uploadedFile.fieldname = fieldname;
+                // result.files.push(uploadedFile);
               }
             });
           }
         );
 
         busboy.on("field", (fieldname, value) => {
-          result[fieldname] = value;
+          fields[fieldname] = value;
         });
 
         busboy.on("error", (error: any) => reject(`Parse error: ${error}`));
-        busboy.on("finish", () => resolve(result));
+        busboy.on("finish", () => resolve({ file: uploadedFile, fields }));
 
         busboy.write(event.body, event.isBase64Encoded ? "base64" : "binary");
         busboy.end();

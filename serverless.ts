@@ -20,9 +20,9 @@ const serverlessConfiguration: Serverless = {
     runtime: "nodejs12.x",
     apiGateway: {
       minimumCompressionSize: 1024,
-      binaryMediaTypes: ["*/*"],
+      binaryMediaTypes: ["multipart/form-data"],
     },
-    
+
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
     },
@@ -32,6 +32,7 @@ const serverlessConfiguration: Serverless = {
         Action: [
           "s3:PutObject",
           "s3:GetObject",
+          "s3:PutObjectTagging",
           "s3:GetBucketPolicy",
           "s3:PutBucketPolicy",
         ],
@@ -44,8 +45,39 @@ const serverlessConfiguration: Serverless = {
     },
   },
   functions: {
-    uploadImage: {
-      handler: "handler.uploadImage",
+    uploadImgDirectly: {
+      handler: "lambdas/uploadImgDirectly.handler",
+      memorySize: 1024, //optional, in MB, default is 1024
+      timeout: 900, //# optional, in seconds, default is 6
+      events: [
+        {
+          http: {
+            method: "post",
+            path: "upload",
+            cors: true,
+          },
+        },
+      ],
+      environment: { Bucket: "${self:custom.bucket}" },
+    },
+    createPostUploadUrl: {
+      handler: "lambdas/createPostUploadUrl.handler",
+      memorySize: 1024, //optional, in MB, default is 1024
+      timeout: 900, //# optional, in seconds, default is 6
+      events: [
+        {
+          http: {
+            method: "post",
+            path: "create-upload-url",
+            cors: true,
+          },
+        },
+      ],
+      environment: { Bucket: "${self:custom.bucket}" },
+    },
+
+    uploadFile: {
+      handler: "lambdas/uploadFile.handler",
       memorySize: 1024, //optional, in MB, default is 1024
       timeout: 900, //# optional, in seconds, default is 6
       events: [

@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import * as AWS from "aws-sdk";
 import * as uuid from "uuid";
-import { FormParser } from "./core/utils/formParser";
+import { FormParser } from "../core/utils/formParser";
 // import Jimp from "Jimp";
 import "source-map-support/register";
 
@@ -15,7 +15,7 @@ const JPEG_MIME_TYPE = "image/jpeg";
 const JPG_MIME_TYPE = "image/jpg";
 const MIME_TYPES = [PNG_MIME_TYPE, JPEG_MIME_TYPE, JPG_MIME_TYPE];
 
-export const uploadImage: APIGatewayProxyHandler = async (event, _context) => {
+export const handler: APIGatewayProxyHandler = async (event, _context) => {
   try {
     const formData: any = await formParser.parser(event, MAX_SIZE);
     const file = formData.files[0];
