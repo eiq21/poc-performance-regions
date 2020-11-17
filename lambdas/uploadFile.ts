@@ -9,7 +9,7 @@ import "source-map-support/register";
 const s3 = new AWS.S3();
 
 const BUCKET_NAME = process.env.Bucket;
-const MAX_SIZE = 10000000; // 20MB
+const MAX_SIZE = 4000000; // 4MB
 const PNG_MIME_TYPE = "image/png";
 const JPEG_MIME_TYPE = "image/jpeg";
 const JPG_MIME_TYPE = "image/jpg";
