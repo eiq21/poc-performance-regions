@@ -111,7 +111,7 @@ const uploadToS3 = (
       Taggins: queryString.encode(tags),
       ContentType: mimeType,
     };
-    const options = { partSize: 10 * 1024 * 1024, queueSize: 1 };
+    const options = { partSize: 5 * 1024 * 1024, queueSize: 1 }; // de 5 en 5 MB
     s3.upload(params, options, (err: any, data: any) => {
       if (err) reject(err);
       resolve(data);
